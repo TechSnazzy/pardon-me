@@ -3,9 +3,11 @@
 _Last updated: 2026-10-01_
 
 ## Where things stand
-First playable build is done and runs locally. It is **not** a git repo yet and has **not** been pushed.
-Sean plays it first, then it goes to GitHub (TechSnazzy) + GitHub Pages and gets linked from the
-seantechguy.com games menu.
+**Published 2026-10-01.**
+- Repo: https://github.com/TechSnazzy/pardon-me (public, MIT; Kenney assets CC0)
+- Play: https://techsnazzy.github.io/pardon-me/ (GitHub Pages, main branch, root)
+- Linked from the seantechguy.com Games menu (repo TechSnazzy/TechSnazzy, `index.html`, "🚶 Pardon Me")
+- To update the live game: commit and push to `main`. Pages rebuilds in about a minute.
 
 ### Update 2026-10-01 (evening): levels, difficulty, cars
 - Hero renamed to **Sean** (`HERO_NAME` in `src/config.js`); in-game text avoids pronouns
@@ -47,10 +49,8 @@ seantechguy.com games menu.
 - Whether the speech voices are funny or annoying (can be turned off)
 
 ## Next steps
-1. Sean play-tests and gives feedback, then tune
-2. `git init`, create a public repo `TechSnazzy/pardon-me`, enable Pages (main, root), the same setup as emmie-goes-to-school
-3. Add a link on seantechguy.com
-4. Optional: LICENSE (Sean to choose), more errands/encounter types (see docs/DESIGN.md)
+1. Play-test on a phone and tune difficulty/timers from feedback
+2. Ideas: character picker for Sean, online leaderboard (needs a small backend), more towns (see docs/DESIGN.md)
 
 ## Notes
 - Local preview: `python3 -m http.server 8737` in this folder, then http://localhost:8737
