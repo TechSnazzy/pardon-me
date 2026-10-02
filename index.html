@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#9fd6f4">
+<title>Pardon Me</title>
+<meta name="description" content="A comedy walking game. Run a simple errand in your neighborhood. Somebody is always in the way.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="errand-card">
+    <div class="label">ERRAND</div>
+    <div id="errand-title"></div>
+    <div id="errand-dest"></div>
+  </div>
+  <div id="timer-wrap">
+    <div id="timer">1:15</div>
+    <div id="compass"><div id="compass-arrow">▲</div></div>
+  </div>
+  <div id="right-col">
+    <div id="score-box"><span class="label">SCORE</span> <b id="score">0</b> <span id="streak" class="hidden"></span></div>
+    <div id="meter">
+      <div class="label">AWKWARDNESS <span id="meter-face">🙂</span></div>
+      <div class="bar"><div id="meter-fill"></div></div>
+    </div>
+    <canvas id="minimap" width="300" height="300"></canvas>
+  </div>
+  <div id="hint"></div>
+  <button id="pause-btn" aria-label="Pause">❚❚</button>
+</div>
+
+<div id="bubbles"></div>
+
+<div id="touch-ui" class="hidden">
+  <div id="stick"><div id="stick-knob"></div></div>
+  <button id="jump-btn">JUMP</button>
+  <button id="hurry-btn">HURRY</button>
+</div>
+
+<div id="screen-loading" class="screen">
+  <div class="panel center">
+    <h1 class="logo">Pardon Me</h1>
+    <div class="loadbar"><div id="load-fill"></div></div>
+    <p class="small">Lacing up shoes…</p>
+  </div>
+</div>
+
+<div id="screen-title" class="screen hidden">
+  <div class="panel center">
+    <h1 class="logo">Pardon Me</h1>
+    <p class="tag">A game about sidewalks, and the people on them.</p>
+    <div class="label">DIFFICULTY</div>
+    <div id="diff-row"></div>
+    <div id="diff-desc"><b id="diff-name"></b> <span id="diff-blurb"></span></div>
+    <div class="label">LEVELS</div>
+    <div id="score-total" class="small"></div>
+    <div id="level-list"></div>
+    <div class="controls-help">
+      <div><b>Move</b> WASD / arrows · or click where to go · or touch stick</div>
+      <div><b>Sprint</b> hold Shift · double-click · HURRY button · <b>Jump</b> Space · JUMP button</div>
+      <div><b>Dawdle</b> hold C · <b>Camera</b> Q / E · right-drag · scroll to zoom</div>
+    </div>
+    <div class="row">
+      <button class="toggle" data-audio="music">♪ Music</button>
+      <button class="toggle" data-audio="sfx">🔊 Sounds</button>
+      <button class="toggle" data-audio="voice">💬 Voices</button>
+    </div>
+    <button id="reset-btn" class="linkish">Reset game (start over)</button>
+  </div>
+</div>
+
+<div id="screen-intro" class="screen hidden">
+  <div class="panel center intro">
+    <div class="label" id="intro-label"></div>
+    <h2 id="intro-title"></h2>
+    <p id="intro-blurb"></p>
+    <div class="intro-meta"><span>📍 <b id="intro-place"></b></span><span>⏱ <b id="intro-time"></b></span></div>
+    <div class="intro-diff" id="intro-diff"></div>
+    <button id="go-btn" class="big">Let's go</button>
+  </div>
+</div>
+
+<div id="screen-pause" class="screen hidden">
+  <div class="panel center">
+    <h2>Paused</h2>
+    <p class="small">Everyone on the sidewalk is also politely frozen.</p>
+    <div class="row">
+      <button class="toggle" data-audio="music">♪ Music</button>
+      <button class="toggle" data-audio="sfx">🔊 Sounds</button>
+      <button class="toggle" data-audio="voice">💬 Voices</button>
+    </div>
+    <div class="row">
+      <button id="resume-btn" class="big">Resume</button>
+      <button id="restart-btn">Restart</button>
+      <button id="quit-btn">Levels &amp; difficulty</button>
+    </div>
+    <div class="row">
+      <button id="reset-btn-2" class="linkish">Reset game (start over)</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-end" class="screen hidden">
+  <div class="panel center">
+    <div id="end-label" class="label"></div>
+    <h2 id="end-title"></h2>
+    <p id="end-line"></p>
+    <div id="end-score"><div class="label">SCORE</div><div id="end-score-num">0</div><div id="end-new"></div><div id="end-score-lines"></div></div>
+    <div id="end-stars"></div>
+    <div id="end-stats"></div>
+    <div id="end-rank"></div>
+    <div id="end-tip" class="small"></div>
+    <div class="row">
+      <button id="next-btn" class="big">Next level ▶</button>
+      <button id="again-btn" class="big">Try again</button>
+      <button id="menu-btn">Levels</button>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
