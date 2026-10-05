@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pardon Me: icon maker</title>
+<style>
+  body { margin: 0; background: #222; color: #eee; font: 14px system-ui; display: flex; gap: 16px; padding: 16px; flex-wrap: wrap; align-items: flex-start; }
+  canvas { border-radius: 22%; box-shadow: 0 4px 20px #0008; }
+  #big { width: 512px; height: 512px; }
+</style>
+</head>
+<body>
+<canvas id="big" width="1024" height="1024"></canvas>
+<div id="previews"></div>
+<script type="importmap">{"imports":{"three":"../vendor/three.module.js"}}</script>
+<script type="module">
+// Renders the app icon from the game's own characters: Sean mid-bump with a stranger.
+// Open via a local server (see README). Files are POSTed back when ?save=1 is passed.
+import * as THREE from 'three';
+import { GLTFLoader } from '../vendor/addons/loaders/GLTFLoader.js';
+
+const S = 1024;
+const loader = new GLTFLoader();
+const load = async (name) => {
+  const g = await loader.loadAsync(`../assets/models/characters/${name}.glb`);
+  g.scene.traverse((o) => { if (o.isMesh) { o.castShadow = true; if (o.material.map) o.material.map.colorSpace = THREE.SRGBColorSpace; } });
+  return g;
+};
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setSize(S, S, false);
+renderer.setPixelRatio(1);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.setClearColor(0x000000, 0);
+
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#fff6e8', '#7a5a8a', 1.8));
+const sun = new THREE.DirectionalLight('#ffffff', 2.6);
+sun.position.set(1.5, 3, 2.5); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -2, right: 2, top: 2, bottom: -2 });
+scene.add(sun);
+
+// sidewalk tile under their feet (shadow catcher)
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), new THREE.ShadowMaterial({ opacity: 0.28 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+const [hero, other] = await Promise.all([load('character-male-e'), load('character-female-b')]);
+const pose = (g, clip, t, x, rotY, lean) => {
+  const root = g.scene;
+  const mixer = new THREE.AnimationMixer(root);
+  const a = mixer.clipAction(g.animations.find((c) => c.name === clip));
+  a.play(); mixer.setTime(t);
+  root.position.set(x, 0, 0);
+  root.rotation.set(0, rotY, 0);
+  const wrap = new THREE.Group(); wrap.add(root); wrap.rotation.z = lean;
+  scene.add(wrap);
+};
+pose(hero, 'walk', 0.18, -0.34, Math.PI / 2 - 0.25, -0.08);
+pose(other, 'walk', 0.5, 0.34, -Math.PI / 2 + 0.25, 0.08);
+
+const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
+cam.position.set(0, 0.78, 3.15);
+cam.lookAt(0, 0.4, 0);
+renderer.render(scene, cam);
+
+// ---- compose the final square in 2D ----
+const out = document.getElementById('big');
+const g = out.getContext('2d');
+// warm sky-to-sunset background
+const bg = g.createLinearGradient(0, 0, 0, S);
+bg.addColorStop(0, '#ffcf4a'); bg.addColorStop(0.55, '#ff8a4a'); bg.addColorStop(1, '#ff5a4a');
+g.fillStyle = bg; g.fillRect(0, 0, S, S);
+// sidewalk band
+g.fillStyle = '#e9e5f0'; g.fillRect(0, S * 0.71, S, S * 0.29);
+g.strokeStyle = '#c9c3d8'; g.lineWidth = 8;
+for (let x = -S; x < S * 2; x += 190) { g.beginPath(); g.moveTo(x, S * 0.71); g.lineTo(x - 240, S); g.stroke(); }
+g.beginPath(); g.moveTo(0, S * 0.85); g.lineTo(S, S * 0.85); g.stroke();
+g.fillStyle = '#bdb6cf'; g.fillRect(0, S * 0.71 - 6, S, 12);
+
+// comic burst behind the heads
+const burst = (cx, cy, r1, r2, n, fill) => {
+  g.beginPath();
+  for (let i = 0; i < n * 2; i++) {
+    const a = (i / (n * 2)) * Math.PI * 2 - Math.PI / 2, r = i % 2 ? r2 : r1;
+    g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  }
+  g.closePath(); g.fillStyle = fill; g.fill();
+  g.lineWidth = 16; g.strokeStyle = '#2b2540'; g.stroke();
+};
+burst(S * 0.5, S * 0.47, S * 0.34, S * 0.23, 14, '#fff3b0');
+
+// the two characters
+g.drawImage(renderer.domElement, 0, 0, S, S);
+
+// "BUMP!" label
+g.save();
+g.translate(S * 0.5, S * 0.16);
+g.rotate(-0.06);
+g.font = `900 ${S * 0.16}px "Arial Black", "Trebuchet MS", system-ui, sans-serif`;
+g.textAlign = 'center'; g.textBaseline = 'middle';
+g.lineJoin = 'round';
+g.lineWidth = S * 0.035; g.strokeStyle = '#2b2540'; g.strokeText('BUMP!', 0, 0);
+g.fillStyle = '#ffffff'; g.fillText('BUMP!', 0, 0);
+g.restore();
+
+// little impact stars between the heads
+g.save(); g.lineWidth = S * 0.007;
+const star = (x, y, r) => {
+  g.beginPath();
+  for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2 - Math.PI / 2, rr = i % 2 ? r * 0.45 : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+  g.closePath(); g.fillStyle = '#ffffff'; g.fill(); g.strokeStyle = '#2b2540'; g.stroke();
+};
+star(S * 0.5, S * 0.33, S * 0.04);
+star(S * 0.6, S * 0.3, S * 0.024);
+star(S * 0.4, S * 0.3, S * 0.024);
+g.restore();
+
+// ---- export sizes ----
+const sizes = [
+  ['icon-512.png', 512], ['icon-192.png', 192], ['apple-touch-icon.png', 180],
+  ['favicon-32.png', 32], ['favicon-16.png', 16],
+];
+const previews = document.getElementById('previews');
+const save = new URLSearchParams(location.search).has('save');
+const results = [];
+for (const [name, size] of sizes) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const cx = c.getContext('2d'); cx.imageSmoothingQuality = 'high';
+  // step down for smoother small sizes
+  let src = out, s = S;
+  while (s / 2 >= size) { const t = document.createElement('canvas'); t.width = t.height = s / 2; const tc = t.getContext('2d'); tc.imageSmoothingQuality = 'high'; tc.drawImage(src, 0, 0, s / 2, s / 2); src = t; s /= 2; }
+  // tiny favicons: zoom in on the two heads so they still read at 16-32px
+  if (size <= 32) { const k = s / S; cx.drawImage(src, S * 0.12 * k, S * 0.1 * k, S * 0.76 * k, S * 0.76 * k, 0, 0, size, size); }
+  else cx.drawImage(src, 0, 0, size, size);
+  c.title = name; c.style.width = c.style.height = `${Math.max(size, 64)}px`;
+  previews.appendChild(c);
+  if (save) {
+    const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+    const res = await fetch(`/save?name=${name}`, { method: 'POST', body: blob });
+    results.push(`${name}:${res.status}`);
+  }
+}
+window.iconDone = results.join(' ') || 'rendered';
+</script>
+</body>
+</html>

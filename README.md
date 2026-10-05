@@ -25,6 +25,12 @@ cd ~/Projects/pardon-me && python3 -m http.server 8737
 
 Then open <http://localhost:8737>.
 
+### Add to your iPhone home screen
+
+Open the game in Safari, tap **Share → Add to Home Screen**. It gets its own icon and opens full-screen
+like an app. The icon is rendered from the game's own characters by `tools/make-icon.html`. To
+regenerate it, open that page through a local server.
+
 ## Controls
 
 | | Keyboard / mouse | Touch |
